@@ -1,0 +1,11 @@
+env.list
+env.list.docker
+maprticket/
+maprticket/*
+maprpaccstreams/
+maprpaccstreams/*
+video/
+video/*
+code/test/
+code/test/*
+weights/
