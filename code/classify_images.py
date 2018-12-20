@@ -26,7 +26,7 @@ except:
     save_images = 1
 
 try:
-    topic_frames =  os.environ["MAPR_STREAMS_STREAM_LOCATION"].replace('"', '') + ":" + os.environ["MAPR_STREAMS_TOPIC_INPUT"].replace('"', '')
+    topic_frames =  os.environ["MAPR_STREAMS_STREAM_INPUT_LOCATION"].replace('"', '') + ":" + os.environ["MAPR_STREAMS_TOPIC_INPUT"].replace('"', '')
 except:
     print("Error getting MAPR_STREAMS_STREAM_LOCATION and MAPR_STREAMS_TOPIC_INPUT from env")
     sys.exit(1)
