@@ -122,7 +122,7 @@ def main ():
             curmsgtime = time.time()
             msgdelta = lastmsgtime - curmsgtime
             if debug:
-                print("Time between last processed messages: % msgdelta)
+                print("Time between last processed messages: %s" %  msgdelta)
             lastmsgtime = curmsgtime
 
             r = python.darknet.detect(net, meta, b'/dev/shm/tmp.jpg')
