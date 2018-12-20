@@ -58,6 +58,14 @@ except:
     sys.exit(1)
 
 
+try:
+    debug = os.environ["APP_DEBUG"].replace('"', '')
+except:
+    print("No Debug passed, assuming 0 (No Debug, set to 1 in env.list to enable Debug")
+    debug = 0
+
+
+
 print("Loading Net")
 net = python.darknet.load_net(b"/app/darknet/cfg/yolov3.cfg",weights_file.encode(),0)
 print("Loading Meta")
@@ -79,7 +87,8 @@ def main ():
     print("Consumer group name: %s" % consumer_group)
     print("")
     print("Consumer group start: %s" % consumer_group_start)
-
+    print("")
+    print("Debug is set to %s" % debug)
 
     con_conf = {'bootstrap.servers': '', 'group.id': consumer_group, 'default.topic.config': {'auto.offset.reset': consumer_group_start}}
     pro_conf = {'bootstrap.servers': '', 'message.max.bytes':'2978246'}
@@ -87,11 +96,14 @@ def main ():
     p = Producer(pro_conf)
 
     c.subscribe([topic_frames])
-
+    lastmsgtime = int(time.time())
     running = True
     while running:
         msg = c.poll(timeout=1.0)
-        if msg is None: continue
+        if msg is None:
+            if debug:
+                print("No Message - Continuing")
+            continue
         if not msg.error():
             mymsg = json.loads(msg.value().decode('utf-8'), object_pairs_hook=OrderedDict)
             mypart = msg.partition()
@@ -107,12 +119,18 @@ def main ():
             o.write(mybytes)
             o.close
 #            myimage = np.array(Image.open(BytesIO(mybytes))) 
+            curmsgtime = int(time.time())
+            msgdelta = lastmsgtime - curmsgtime
+            if debug:
+                print("Time between last processed messages: % msgdelta)
+            lastmsgtime = curmsgtime
 
             r = python.darknet.detect(net, meta, b'/dev/shm/tmp.jpg')
             if r != []:
                 curtime = datetime.datetime.now()
                 mystrtime = curtime.strftime("%Y-%m-%d %H:%M:%S")
                 epochtime = int(time.time())
+
                 arclass = []
                 if save_images == 1:
                     try:
