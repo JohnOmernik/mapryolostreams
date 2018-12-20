@@ -65,6 +65,12 @@ except:
     debug = 0
 
 
+try:
+    nomsgcnt = int(os.environ["APP_NO_MESSAGE_CNT"].replace('"', ''))
+except:
+    print("No exit on no messages sent, assuming you want to stay running so setting to 0")
+    nomsgcnt = 0
+
 
 print("Loading Net")
 net = python.darknet.load_net(b"/app/darknet/cfg/yolov3.cfg",weights_file.encode(),0)
@@ -89,6 +95,9 @@ def main ():
     print("Consumer group start: %s" % consumer_group_start)
     print("")
     print("Debug is set to %s" % debug)
+    print("")
+    print("nomsgcnt is set to %s - if this is greater than 0, then when we have that many attempts to read a msg from MapR Streams, we will exit" % nomsgcnt)
+
 
     con_conf = {'bootstrap.servers': '', 'group.id': consumer_group, 'default.topic.config': {'auto.offset.reset': consumer_group_start}}
     pro_conf = {'bootstrap.servers': '', 'message.max.bytes':'2978246'}
@@ -97,12 +106,17 @@ def main ():
 
     c.subscribe([topic_frames])
     lastmsgtime = time.time()
+    nomsg = 0
     running = True
     while running:
         msg = c.poll(timeout=1.0)
         if msg is None:
+            nomsg += 1
             if debug:
                 print("No Message - Continuing")
+            if nomsgcnt > 0 and nomsg >= nomsgcnt:
+                print("%s itterations with no messages reached - Exiting Gracefully")
+                sys.exit(0)
             continue
         if not msg.error():
             mymsg = json.loads(msg.value().decode('utf-8'), object_pairs_hook=OrderedDict)
@@ -120,13 +134,15 @@ def main ():
             o.close
 #            myimage = np.array(Image.open(BytesIO(mybytes))) 
             curmsgtime = time.time()
-            msgdelta = lastmsgtime - curmsgtime
+            msgdelta = curmsgtime - lastmsgtime
             if debug:
                 print("Time between last processed messages: %s" %  msgdelta)
             lastmsgtime = curmsgtime
 
             r = python.darknet.detect(net, meta, b'/dev/shm/tmp.jpg')
             if r != []:
+                if debug:
+                    print("Got classification!")
                 curtime = datetime.datetime.now()
                 mystrtime = curtime.strftime("%Y-%m-%d %H:%M:%S")
                 epochtime = int(time.time())
