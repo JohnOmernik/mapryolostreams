@@ -96,7 +96,7 @@ def main ():
     p = Producer(pro_conf)
 
     c.subscribe([topic_frames])
-    lastmsgtime = int(time.time())
+    lastmsgtime = time.time()
     running = True
     while running:
         msg = c.poll(timeout=1.0)
@@ -119,7 +119,7 @@ def main ():
             o.write(mybytes)
             o.close
 #            myimage = np.array(Image.open(BytesIO(mybytes))) 
-            curmsgtime = int(time.time())
+            curmsgtime = time.time()
             msgdelta = lastmsgtime - curmsgtime
             if debug:
                 print("Time between last processed messages: % msgdelta)
