@@ -8,13 +8,13 @@ echo "Image OS class: ubuntu16"
 
 echo "Docker FROM: $STARTIMG"
 
-echo "MapR Core: 6.0.1"
+echo "MapR Core: 6.1.0"
 
-echo "MapR MEP: 5.0.0"
+echo "MapR MEP: 6.0.0"
 
 echo "Install Hadoop YARN client: n"
 
-echo "MapR Image name: maprcuda:6.0.1._5.0.0_ubuntu16"
+echo "MapR Image name: maprcuda:6.1.0_6.0.0_ubuntu16"
 
 echo "Container network mode: bridge (default)"
 

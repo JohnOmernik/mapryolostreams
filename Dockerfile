@@ -1,5 +1,4 @@
-FROM maprcuda:6.0.1._5.0.0_ubuntu16
-
+FROM maprcuda:6.1.0_6.0.0_ubuntu16
 WORKDIR /app
 
 # Versions being run
@@ -66,15 +65,26 @@ RUN echo "eval=coco" >> /app/darknet/cfg/coco.data
 RUN sed -i "s@libdarknet.so@/app/darknet/libdarknet.so@g" /app/darknet/python/darknet.py
 
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-ENV LIBRARY_PATH=/opt/mapr/lib
-ENV C_INCLUDE_PATH=/opt/mapr/include
+#ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+#ENV LIBRARY_PATH=/opt/mapr/lib
+#ENV C_INCLUDE_PATH=/opt/mapr/include
 
-# Install MapR LibRD KAfka - Have to unpack it and manually install it into the PACC
-RUN MYPWD=`pwd` && wget ${MAPR_LIBRDKAFKA_BASE}/${MAPR_LIBRDKAFKA_FILE} && dpkg -x ${MAPR_LIBRDKAFKA_FILE} ./tmp  && \
-    mkdir /opt/mapr/include/librdkafka && cp ./tmp/opt//mapr/include/librdkafka/* /opt/mapr/include/librdkafka/ && \
-    cp ./tmp/opt/mapr/lib/librdkafka.so.1 /opt/mapr/lib/ &&  cd /opt/mapr/lib && ln -s librdkafka.so.1 librdkafka.so && ln -s librdkafka.so.1 librdkafka.a &&  ln -s libMapRClient.so libMapRClient_c.so && cd $MYPWD && \
-    rm -rf ./tmp && rm ./${MAPR_LIBRDKAFKA_FILE} && ldconfig
+# Install MapR LibRD KAfka - Have to unpack it and manually install it into the PACC This is now down in 6.1.0!
+#RUN MYPWD=`pwd` && wget ${MAPR_LIBRDKAFKA_BASE}/${MAPR_LIBRDKAFKA_FILE} && dpkg -x ${MAPR_LIBRDKAFKA_FILE} ./tmp  && \
+#    mkdir /opt/mapr/include/librdkafka && cp ./tmp/opt//mapr/include/librdkafka/* /opt/mapr/include/librdkafka/ && \
+#    cp ./tmp/opt/mapr/lib/librdkafka.so.1 /opt/mapr/lib/ &&  cd /opt/mapr/lib && ln -s librdkafka.so.1 librdkafka.so && ln -s librdkafka.so.1 librdkafka.a &&  ln -s libMapRClient.so libMapRClient_c.so && cd $MYPWD && \
+#    rm -rf ./tmp && rm ./${MAPR_LIBRDKAFKA_FILE} && ldconfig
+
+RUN ln -s /opt/mapr/lib/librdkafka_jvm.so.1 /usr/lib/librdkafka_jvm.so && \
+    ln -s /opt/mapr/lib/librdkafka_jvm.so.1 /usr/lib/librdkafka_jvm.so.1 && \
+    ln -s /opt/mapr/lib/librdkafka.so.1 /usr/lib/librdkafka.so && \
+    ln -s /opt/mapr/lib/librdkafka.so.1 /usr/lib/librdkafka.so.1 && \
+    ln -s /opt/mapr/lib/libMapRClient_c.so.1 /usr/lib/libMapRClient_c.so.1 && \
+    ln -s /opt/mapr/lib/libMapRClient_c.so.1 /usr/lib/libMapRClient_c.so  && \
+    ln -s /opt/mapr/lib/libMapRClient.so.1 /usr/lib/libMapRClient.so.1 && \
+    ln -s /opt/mapr/lib/libMapRClient.so.1 /usr/lib/libMapRClient.so  && \
+    ln -s /opt/mapr/include/librdkafka /usr/include/librdkafka
+
 
 RUN pip install python-snappy python-lzo brotli kazoo requests pytest
 RUN pip3 install python-snappy python-lzo brotli kazoo requests pytest
